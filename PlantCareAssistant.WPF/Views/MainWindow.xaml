@@ -1,0 +1,147 @@
+﻿<Window x:Class="PlantCareAssistant.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Plant Care Assistant" Height="700" Width="1200"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Панель управления -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="250" Margin="0,0,10,0" 
+                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <TextBlock Text="Местоположение:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <ComboBox Width="120" Margin="0,0,10,0"
+                          ItemsSource="{Binding Locations}"
+                          SelectedItem="{Binding SelectedLocation}"/>
+
+                <TextBlock Text="Тип ухода:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <ComboBox Width="150" Margin="0,0,10,0"
+                          ItemsSource="{Binding CareTypes}"
+                          SelectedItem="{Binding SelectedCareType}"/>
+
+                <Button Content="Добавить растение" Width="130" Height="25" Margin="10,0,0,0"
+                        Command="{Binding AddPlantCommand}"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Основной контент -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Список растений -->
+            <GroupBox Grid.Column="0" Header="Каталог растений" Margin="0,0,5,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ListBox ItemsSource="{Binding FilteredPlants}" 
+                             SelectedItem="{Binding SelectedPlant}"
+                             BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" 
+                                        Margin="5" Padding="10" Width="220" Height="280"
+                                        Background="{Binding Status, Converter={StaticResource StatusToBackgroundConverter}}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" 
+                                                   TextWrapping="Wrap" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Species}" FontStyle="Italic" 
+                                                   Foreground="Gray" HorizontalAlignment="Center"/>
+
+                                        <Rectangle Height="100" Margin="0,10" Fill="LightGreen" 
+                                                   Stroke="DarkGreen" StrokeThickness="1"/>
+
+                                        <TextBlock Text="{Binding Location}" Margin="0,5,0,0"/>
+                                        <TextBlock Text="{Binding CareType}" Foreground="DarkBlue"/>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <TextBlock Text="Статус: " FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding Status}" 
+                                                       Foreground="{Binding Status, Converter={StaticResource StatusToColorConverter}}"/>
+                                        </StackPanel>
+
+                                        <TextBlock Text="{Binding NextWateringDate, StringFormat='След. полив: {0:dd.MM.yyyy}'}" 
+                                                   Foreground="DarkRed" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </ScrollViewer>
+            </GroupBox>
+
+            <!-- Панель ухода -->
+            <GroupBox Grid.Column="1" Header="Требуют внимания" Margin="5,0,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding PlantsRequiringCare}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="Orange" BorderThickness="1" CornerRadius="3" 
+                                        Margin="0,5" Padding="5" Background="#FFF4E6">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding CareActionNeeded}" Foreground="Red" 
+                                                   FontSize="11" Margin="0,2,0,0"/>
+                                        <Button Content="Отметить уход" Margin="0,5,0,0" Padding="2"
+                                                Command="{Binding DataContext.MarkCareCommand, 
+                                                RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </GroupBox>
+        </Grid>
+
+        <!-- Статистика и кнопки -->
+        <StackPanel Grid.Row="2" Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="{Binding TotalPlantsCount, StringFormat='Всего растений: {0}'}" 
+                           Margin="0,0,20,0" FontWeight="Bold"/>
+                <TextBlock Text="{Binding HealthyPlantsCount, StringFormat='Здоровые: {0}'}" 
+                           Margin="0,0,20,0" Foreground="Green"/>
+                <TextBlock Text="{Binding AttentionPlantsCount, StringFormat='Требуют внимания: {0}'}" 
+                           Margin="0,0,20,0" Foreground="Orange"/>
+                <TextBlock Text="{Binding SickPlantsCount, StringFormat='Болеют: {0}'}" 
+                           Foreground="Red"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Редактировать" Width="100" Height="30" Margin="0,0,10,0"
+                        Command="{Binding EditPlantCommand}"
+                        IsEnabled="{Binding HasSelectedPlant}"/>
+                <Button Content="Уход" Width="100" Height="30" Margin="0,0,10,0"
+                        Command="{Binding OpenCareWindowCommand}"
+                        IsEnabled="{Binding HasSelectedPlant}"/>
+                <Button Content="Удалить" Width="100" Height="30"
+                        Command="{Binding DeletePlantCommand}"
+                        IsEnabled="{Binding HasSelectedPlant}"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

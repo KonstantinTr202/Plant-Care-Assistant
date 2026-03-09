@@ -1,0 +1,132 @@
+﻿<Window x:Class="PlantCareAssistant.WPF.PlantWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding WindowTitle}" Height="650" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Название -->
+                <TextBlock Text="Название *" Margin="0,0,0,5" FontWeight="Bold"/>
+                <TextBox Text="{Binding Plant.Name, UpdateSourceTrigger=PropertyChanged}" 
+                         Margin="0,0,0,10">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="BorderBrush" Value="Gray"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasNameError}" Value="True">
+                                    <Setter Property="BorderBrush" Value="Red"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <TextBlock Text="{Binding NameErrorMessage}" Foreground="Red" FontSize="10" 
+                           Margin="0,0,0,10" Visibility="{Binding HasNameError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                <!-- Вид/Сорт -->
+                <TextBlock Text="Вид/Сорт" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding Plant.Species}" Margin="0,0,0,10"/>
+
+                <!-- Местоположение -->
+                <TextBlock Text="Местоположение" Margin="0,0,0,5"/>
+                <ComboBox ItemsSource="{Binding Locations}" 
+                          SelectedItem="{Binding Plant.Location}"
+                          Margin="0,0,0,10"/>
+
+                <!-- Тип ухода -->
+                <TextBlock Text="Тип ухода" Margin="0,0,0,5"/>
+                <ComboBox ItemsSource="{Binding CareTypes}" 
+                          SelectedItem="{Binding Plant.CareType}"
+                          Margin="0,0,0,10"/>
+
+                <!-- Дата приобретения -->
+                <TextBlock Text="Дата приобретения" Margin="0,0,0,5"/>
+                <DatePicker SelectedDate="{Binding Plant.PurchaseDate}" 
+                            Margin="0,0,0,10"/>
+
+                <!-- Статус -->
+                <TextBlock Text="Статус" Margin="0,0,0,5"/>
+                <ComboBox ItemsSource="{Binding Statuses}" 
+                          SelectedItem="{Binding Plant.Status}"
+                          Margin="0,0,0,10"/>
+
+                <!-- Полив и Удобрение -->
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Полив (дни)" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Plant.WateringFrequencyDays, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasWateringError}" Value="True">
+                                            <Setter Property="BorderBrush" Value="Red"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <TextBlock Text="{Binding WateringErrorMessage}" Foreground="Red" FontSize="10"
+                                   Visibility="{Binding HasWateringError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Удобрение (недели)" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Plant.FertilizerFrequencyWeeks, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasFertilizerError}" Value="True">
+                                            <Setter Property="BorderBrush" Value="Red"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <TextBlock Text="{Binding FertilizerErrorMessage}" Foreground="Red" FontSize="10"
+                                   Visibility="{Binding HasFertilizerError, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Опрыскивание -->
+                <CheckBox Content="Требуется опрыскивание" 
+                          IsChecked="{Binding Plant.NeedsSpraying}"
+                          Margin="0,0,0,10"/>
+
+                <!-- Освещение -->
+                <TextBlock Text="Освещение" Margin="0,0,0,5"/>
+                <ComboBox ItemsSource="{Binding LightingTypes}" 
+                          SelectedItem="{Binding Plant.Lighting}"
+                          Margin="0,0,0,10"/>
+
+                <!-- Примечания -->
+                <TextBlock Text="Примечания" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding Plant.Notes}" Height="80" TextWrapping="Wrap" 
+                         AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Кнопки -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button Content="Сохранить" Width="100" Height="30" Margin="0,0,10,0"
+                    Command="{Binding SaveCommand}"/>
+            <Button Content="Отмена" Width="100" Height="30"
+                    Command="{Binding CancelCommand}" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
